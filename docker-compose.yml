@@ -1,0 +1,39 @@
+version: "3.8"
+
+services:
+    app:
+        build:
+            context: .
+            dockerfile: Dockerfile
+        container_name: laravel_app
+        networks:
+            - app_network
+            - mariadb_network
+        environment:
+            APP_ENV: production
+            APP_DEBUG: false
+            APP_KEY: ${APP_KEY}
+            DB_CONNECTION: mysql
+            DB_HOST: centralized_mariadb
+            DB_PORT: 3306
+            DB_DATABASE: your_database
+            DB_USERNAME: your_username
+            DB_PASSWORD: your_password
+        volumes:
+            - .:/var/www
+        depends_on:
+            - db
+        ports:
+            - "9000:9000"
+
+    # This is for local development; no need to run a new MariaDB instance
+    # since you already have a centralized_mariadb.
+
+networks:
+    app_network:
+        driver: bridge
+    mariadb_network:
+        external: true
+
+volumes:
+    db_data:
