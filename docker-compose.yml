@@ -23,17 +23,28 @@ services:
             - .:/var/www
         depends_on:
             - db
-        ports:
-            - "9000:9000"
+        working_dir: /var/www
+        expose:
+            - "9000" # Internal communication port
 
-    # This is for local development; no need to run a new MariaDB instance
-    # since you already have a centralized_mariadb.
+    nginx:
+        image: nginx:alpine
+        container_name: laravel_nginx
+        networks:
+            - npm_network # For Nginx Proxy Manager
+            - app_network # To communicate with Laravel
+        volumes:
+            - ./nginx.conf:/etc/nginx/nginx.conf:ro # Custom Nginx configuration
+            - .:/var/www:ro
+        depends_on:
+            - app
+        ports:
+            - "8081:80" # Internal communication for testing/debugging (optional)
 
 networks:
     app_network:
         driver: bridge
     mariadb_network:
         external: true
-
-volumes:
-    db_data:
+    npm_network:
+        external: true
