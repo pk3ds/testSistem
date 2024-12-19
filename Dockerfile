@@ -15,24 +15,16 @@ RUN apt-get update && apt-get install -y \
     unzip \
     curl \
     git \
-    npm \
     && docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd
 
 # Install Composer
 COPY --from=composer:2.6 /usr/bin/composer /usr/bin/composer
 
-# Install Node.js and NPM
-RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - \
-    && apt-get install -y nodejs
-
-# Copy application files
+# Copy application files (excluding `node_modules` and unbuilt assets)
 COPY . .
 
 # Install PHP dependencies
 RUN composer install --optimize-autoloader --no-dev
-
-# Install JavaScript dependencies and build assets
-RUN npm install && npm run build
 
 # Set permissions for Laravel
 RUN chmod -R 775 storage bootstrap/cache \
